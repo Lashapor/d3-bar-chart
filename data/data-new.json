@@ -1,0 +1,22 @@
+[
+  {
+    "name": "orange",
+    "value": 21,
+    "color": "orange"
+  },
+  {
+    "name": "apple",
+    "value": 16,
+    "color": "green"
+  },
+  {
+    "name": "strawbery",
+    "value": 20,
+    "color": "orangered"
+  },
+  {
+    "name": "peach",
+    "value": 16,
+    "color": "red"
+  }
+]

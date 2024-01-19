@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./styles/index.css">
+  <script src="https://cdn.jsdelivr.net/npm/lil-gui@0.19"></script>
+  <title>D3 Chart</title>
+</head>
+
+<body translate="no">
+  <div class="page-container">
+    <div id="graph-container"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script src="./scripts/d3chart.js"></script>
+
+  <script>
+    let chart;
+    let dataNew = "./data/data-new.json"
+    d3.json("./data/data.json").then((data) => {
+      chart = new Chart()
+        .svgHeight(window.innerHeight - 30)
+        .svgWidth(window.innerWidth - 30)
+        .container("#graph-container")
+        .guiEnabled(true)
+        .data(data)
+        .render();
+    })
+
+    // new data
+    // setInterval(() => {
+    //   d3.json("./data/data-new.json").then((dataNew) => {
+    //     chart.data(dataNew).render();
+    //   })
+    // }, 5000);
+  </script>
+</body>
+
+</html>
