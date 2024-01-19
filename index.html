@@ -23,8 +23,8 @@
     let dataNew = "./data/data-new.json"
     d3.json("./data/data.json").then((data) => {
       chart = new Chart()
-        .svgHeight(window.innerHeight - 30)
-        .svgWidth(window.innerWidth - 30)
+        .svgHeight(700)
+        .svgWidth(700)
         .container("#graph-container")
         .guiEnabled(true)
         .data(data)

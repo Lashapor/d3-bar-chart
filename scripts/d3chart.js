@@ -3,11 +3,11 @@ class Chart {
     // Defining state attributes
     const attrs = {
       id: "ID" + Math.floor(Math.random() * 1000000),
-      svgWidth: 400,
-      svgHeight: 200,
-      marginTop: 5,
+      svgWidth: 500,
+      svgHeight: 500,
+      marginTop: 40,
       marginBottom: 5,
-      marginRight: 5,
+      marginRight: 300,
       marginLeft: 5,
       container: "body",
       defaultTextFill: "#2C3E50",
@@ -44,7 +44,7 @@ class Chart {
     this.setDynamicContainer()
     this.calculateProperties();
     this.drawSvgAndWrappers();
-    this.drawRects();
+    this.drawBarChart();
     return this;
   }
 
@@ -75,21 +75,83 @@ class Chart {
     this.setState({ calc, chartWidth, chartHeight })
   }
 
-  drawRects() {
+  drawBarChart() {
     const { chart, data, chartWidth, chartHeight } = this.getState();
 
     console.log({ data: data })
 
-    chart
-      ._add({
-        tag: "rect",
-        selector: "rect-sample",
-        data: [data]
+    let valueSum = d3.sum(data, (d) => d.value)
+
+    let gInitial = chart.selectAll('g.row').data(data, (d) => d.key)
+
+    const gEnter = gInitial.enter().append('g')
+
+    const gExit = gInitial.exit();
+    const g = gEnter.merge(gInitial)
+
+    g.attr('clas', 'row')
+
+    gExit
+      .transition()
+      .duration(500)
+      .attr('transform', (d, i, arr) => `translate(-1000,${50 + 25 * i})`)
+      .on('end', function () {
+        d3.select(this).remove();
       })
-      .attr("width", chartWidth)
-      .attr("height", chartHeight)
-      .attr("fill", (d) => {
-        return d.color
+
+    gEnter.attr('transform', (d, i, arr) => `translate(1000,${50 + 25 * i})`)
+
+    g.transition()
+      .duration(1000)
+      .attr('transform', (d, i, arr) => `translate(10,${50 + 25 * i})`)
+
+    g.selectAll('text.keys')
+      .data((d) => [d])
+      .join('text')
+      .text((d) => d.key)
+      .attr('class', 'keys')
+      .attr('y', 16)
+      .attr('text-anchor', 'end')
+      .attr('x', 140)
+
+    const maxValue = d3.max(data, d => d.value)
+
+    const xScale = d3.scaleLinear().domain([0, maxValue]).range([0, chartWidth])
+
+    g
+      .selectAll("rect.bars")
+      .data((d) => [d])
+      .join("rect")
+      .attr("class", "bars")
+      .attr("height", 20)
+      .attr("fill", "darkblue")
+      .attr("x", 150)
+      .transition()
+      .duration(1000)
+      .delay((d, i, arr) => 1000 + i * 100)
+      .attr("width", (d) => {
+        return xScale(d.value)
+      })
+
+    g.selectAll('text.percents')
+      .data((d) => [d])
+      .join('text')
+      .attr('class', 'percents')
+      .text((d) => {
+        const p = Math.round((d.value / valueSum) * 100 * 10) / 10
+        return p + '%'
+      })
+      .attr('font-size', 11)
+      .attr('y', 16)
+      .attr('x', function () {
+        const current = d3.select(this).attr('x');
+        return current || 155;
+      })
+      .transition()
+      .duration(1000)
+      .delay((d, i, arr) => 1000 + i * 100)
+      .attr('x', (d) => {
+        return 150 + xScale(d.value) + 5
       })
   }
 
@@ -125,16 +187,6 @@ class Chart {
         "transform",
         "translate(" + calc.chartLeftMargin + "," + calc.chartTopMargin + ")"
       );
-
-    chart
-      ._add({
-        tag: "rect",
-        selector: "rect-sample",
-        data: [data]
-      })
-      .attr("width", chartWidth)
-      .attr("height", chartHeight)
-      .attr("fill", (d) => d.color)
 
     this.setState({ chart, svg })
   }
@@ -178,7 +230,7 @@ class Chart {
     // Drawing contaienrs
     let d3Container = d3.select(attrs.container);
     let containerRect = d3Container.node().getBoundingClientRect();
-    if (containerRect.width > 0) attrs.svgWidth = containerRect.width;
+    // if (containerRect.width > 0) attrs.svgWidth = containerRect.width;
 
     d3.select(window).on("resize." + attrs.id, () => {
       let containerRect = d3Container.node().getBoundingClientRect();
@@ -191,7 +243,7 @@ class Chart {
 
   addChartGui() {
     const { guiEnabled, firstRender } = this.getState()
-    console.log({ guiEnabled, firstRender })
+    // console.log({ guiEnabled, firstRender })
     if (!guiEnabled || !firstRender) return;
     if (typeof lil == 'undefined') return;
     const gui = new lil.GUI()
@@ -211,7 +263,7 @@ class Chart {
 
       )
       .filter(d => !['guiEnabled', 'firstRender'].includes(d))
-    console.log({ supportedKeys, state })
+    // console.log({ supportedKeys, state })
     supportedKeys.forEach(key => {
       gui.add(state, key).onChange(d => {
         propChanged();
